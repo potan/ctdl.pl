@@ -1,8 +1,8 @@
 
 % Eventuality types and thematic roles
 
-ct_Evetuality(soaLeave).
-ct_Evetuality(soaPay).
+ct_Eventuality(soaLeave).
+ct_Eventuality(soaPay).
 
 ct_ThematicRole(soaHas_agent).
 ct_ThematicRole(soaHas_object).
