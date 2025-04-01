@@ -4,6 +4,9 @@
 :- table ct_and/2.
 :- table ct_or/2.
 
+:- table ct_disjunction/2.
+:- table mk_disjunction_or/3.
+
 :- table meta_triple/4.
 
 :- table mod_not/2.
@@ -129,9 +132,13 @@ ct_triple(NE, type, rexist) :-
 %       NOT EXISTS{?r1 rdf:type :true; rdf:predicate rdf:type; rdf:object ?rpom. 
 %                  ?r2 rdf:type :true; rdf:predicate rdf:type; rdf:object ?rpom.
 %                  {?r1 rdf:subject ?e1. ?r2 rdf:subject ?e2.}UNION{?r1 rdf:subject ?e2. ?r2 rdf:subject ?e1.}}}
-
-%%% TODO!
-
+mk_disjunction_or(E1, E2, RPOM) :-
+  ct_or(EO, [E1, E2]),
+  ct_type(EO, RPOM),
+  member(RPOM, [rexist, permitted, optional]).
+meta_triple(disjunction_arg(E1, RPOM), E1, type, RPOM) :- mk_disjunction_or(E1, _, RPOM).
+meta_triple(disjunction_arg(E2, RPOM), E2, type, RPOM) :- mk_disjunction_or(_, E2, RPOM).
+ct_disjunction(disjunction_arg(E1, RPOM), disjunction_arg(E2, RPOM)) :- mk_disjunction_or(E1, E2, RPOM).
 
 %CONSTRUCT{?eo a ?rpom}
 %  WHERE{{?eo :or1 ?e1. ?eo :or2 ?e2.}UNION{?eo :or1 ?e2. ?eo :or2 ?e1.}
@@ -302,7 +309,13 @@ ct_triple(not_optional(E), type, FH) :- member(FH, [false, hold]), not_optional(
 %        NOT EXISTS{{?r1 :disjunction ?r2}UNION{?r2 :disjunction ?r1}
 %                   ?r1 rdf:type :true; rdf:subject ?e; rdf:predicate rdf:type; rdf:object :Obligatory. 
 %                   ?r2 rdf:type :true; rdf:subject ?ne; rdf:predicate rdf:type; rdf:object :Obligatory.}}
-%  TODO!
+mk_disjunction_not(E, NE) :-
+  ct_not([E, NE]),
+  meta_types(E, type, optional, [false, hold]).
+meta_triple(disjunction_arg(E, obligatory), E, type, obligatory) :- mk_disjunction_not(E, _).
+meta_triple(disjunction_arg(NE, obligatory), NE, type, obligatory) :- mk_disjunction_not(_, NE).
+ct_disjunction(disjunction_arg(E, obligatory), disjunction_arg(NE, obligatory)) :-
+  mk_disjunction_not(E, NE).
 
 
 
